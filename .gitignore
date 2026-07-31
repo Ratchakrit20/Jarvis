@@ -1,0 +1,18 @@
+# AI model weights
+app/models/
+models/
+*.safetensors
+*.bin
+*.pt
+*.pth
+
+# Generated files
+__pycache__/
+*.py[cod]
+logs/
+temp.mp3
+
+# Environment
+.venv/
+venv/
+.env
