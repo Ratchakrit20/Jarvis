@@ -137,6 +137,11 @@ requirements.txt
 - Ollama
 - CUDA
 
+## Installation and recovery
+
+For a fresh clone, model download, dependency installation, and troubleshooting,
+see [SETUP.md](SETUP.md).
+
 ---
 
 # Current Model

@@ -5,6 +5,8 @@ accelerate
 
 sounddevice
 soundfile
+edge-tts
+pygame
 
 numpy
 scipy
