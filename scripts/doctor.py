@@ -28,6 +28,7 @@ IMPORTS = {
     "soundfile": "soundfile",
     "torch": "torch",
     "transformers": "transformers",
+    "yt-dlp": "yt_dlp",
 }
 
 

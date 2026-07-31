@@ -47,7 +47,7 @@ TOOL_ALIASES = {
         "ยุทูป",
     ],
 
-    "open_youtube_search": [
+    "play_youtube_song": [
         # Thai music
         "เปิดเพลง",
         "เล่นเพลง",
@@ -75,6 +75,21 @@ TOOL_ALIASES = {
         "search music",
         "search youtube",
         "youtube search",
+    ],
+
+    "open_facebook": [
+        "เปิด facebook", "เปิดเฟซบุ๊ก", "เปิดเฟสบุ๊ค", "เปิดเฟส", "เข้า facebook",
+        "open facebook", "open fb",
+    ],
+
+    "open_instagram": [
+        "เปิด instagram", "เปิดอินสตาแกรม", "เปิดไอจี", "เข้า instagram", "เข้าไอจี",
+        "open instagram", "open ig",
+    ],
+
+    "search_google": [
+        "ค้นหาในกูเกิล", "ค้นหาใน google", "ค้นหาบนกูเกิล", "ค้นหา google",
+        "หาในกูเกิล", "หาใน google", "search google", "google search",
     ],
 
     "get_time": [
@@ -156,6 +171,21 @@ YOUTUBE_PATTERNS = [
     r"เล่น\s*ยู\s*ทูป",
     r"open\s+youtube",
     r"watch\s+youtube",
+]
+
+FACEBOOK_PATTERNS = [
+    r"(เปิด|เข้า)\s*(facebook|fb|เฟซบุ๊ก|เฟสบุ๊ค|เฟส)",
+    r"open\s+(facebook|fb)",
+]
+
+INSTAGRAM_PATTERNS = [
+    r"(เปิด|เข้า)\s*(instagram|ig|อินสตาแกรม|ไอจี)",
+    r"open\s+(instagram|ig)",
+]
+
+GOOGLE_SEARCH_PATTERNS = [
+    r"(ค้นหา|หา)\s*(ใน|บน)?\s*(google|กูเกิล)",
+    r"(search\s+google|google\s+search)",
 ]
 
 DATE_PATTERNS = [
@@ -325,17 +355,27 @@ def resolve_tool(tool_name: str | None, user_text: str):
     if is_memory_or_general_today_question(text):
         return None
 
-    # 3) YouTube Search / เปิดเพลง ต้องมาก่อน open_youtube ธรรมดา
+    # 3) Website and web-search tools
+    if match_patterns(text, FACEBOOK_PATTERNS) or match_alias(text, TOOL_ALIASES["open_facebook"]):
+        return "open_facebook"
+
+    if match_patterns(text, INSTAGRAM_PATTERNS) or match_alias(text, TOOL_ALIASES["open_instagram"]):
+        return "open_instagram"
+
+    if match_patterns(text, GOOGLE_SEARCH_PATTERNS) or match_alias(text, TOOL_ALIASES["search_google"]):
+        return "search_google"
+
+    # 4) Play the first matching YouTube song
     if match_patterns(text, YOUTUBE_SEARCH_PATTERNS):
-        return "open_youtube_search"
+        return "play_youtube_song"
 
-    if match_alias(text, TOOL_ALIASES["open_youtube_search"]):
-        return "open_youtube_search"
+    if match_alias(text, TOOL_ALIASES["play_youtube_song"]):
+        return "play_youtube_song"
 
-    if fuzzy_match_alias(text, TOOL_ALIASES["open_youtube_search"], threshold=0.82):
-        return "open_youtube_search"
+    if fuzzy_match_alias(text, TOOL_ALIASES["play_youtube_song"], threshold=0.82):
+        return "play_youtube_song"
 
-    # 4) YouTube ธรรมดา
+    # 5) YouTube home page
     if match_patterns(text, YOUTUBE_PATTERNS):
         return "open_youtube"
 
@@ -345,7 +385,7 @@ def resolve_tool(tool_name: str | None, user_text: str):
     if fuzzy_match_alias(text, TOOL_ALIASES["open_youtube"], threshold=0.82):
         return "open_youtube"
 
-    # 5) Time
+    # 6) Time
     if match_patterns(text, TIME_PATTERNS):
         return "get_time"
 
@@ -355,7 +395,7 @@ def resolve_tool(tool_name: str | None, user_text: str):
     if fuzzy_match_alias(text, TOOL_ALIASES["get_time"], threshold=0.86):
         return "get_time"
 
-    # 6) Date
+    # 7) Date
     if match_patterns(text, DATE_PATTERNS):
         return "get_date"
 

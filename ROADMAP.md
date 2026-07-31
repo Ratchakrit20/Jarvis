@@ -1,6 +1,6 @@
 # Jarvis AI Roadmap
 
-Last Updated: 2026-07-23
+Last Updated: 2026-07-31
 
 ---
 
@@ -30,6 +30,7 @@ Jarvis แบ่งระบบออกเป็น Module หลักดั�
 * Tool Module
 * Memory Module
 * Meeting Intelligence Module
+* Home Network Intelligence Module
 * Remote Channel Module
 * Desktop Automation Module
 * Vision Module
@@ -41,7 +42,7 @@ Jarvis แบ่งระบบออกเป็น Module หลักดั�
 
 # Phase 1: Stable Voice Assistant Core
 
-Status: In Progress
+Status: Core MVP Code Complete / Hardware Acceptance Pending
 
 เป้าหมายของ Phase 1 คือทำให้ระบบ Voice Assistant ที่มีอยู่ทำงานได้เสถียร ก่อนเพิ่ม Meeting Summary และความสามารถใหม่
 
@@ -135,7 +136,7 @@ Status: Completed / Testing
 
 ## Step 3: Agent Intent and Tool Resolver
 
-Status: Next
+Status: Completed (2026-07-31)
 
 เป้าหมาย:
 
@@ -171,20 +172,21 @@ General Agent / Memory / Tool / Meeting Module
 ↓
 สร้างคำตอบ
 
-สิ่งที่ต้องทำ:
+สิ่งที่ทำแล้ว:
 
-* สร้าง `IntentClassifier`
+* สร้าง `IntentClassifier` และ Intent Result ที่มี Confidence Score
 * ให้ Intent Layer ทำงานก่อน Tool Resolver
-* ปรับ Tool Resolver ให้ตรวจทั้งความหมาย ไม่ใช่เฉพาะ Keyword
-* เพิ่ม Confidence Score
-* ถ้า Confidence ต่ำ ให้ตอบแบบ General Chat หรือขอข้อมูลเพิ่ม
-* เพิ่ม Test Cases ภาษาไทยและอังกฤษ
+* สร้าง `AgentRouter` สำหรับเลือก General Chat, Tool และ Module อนาคต
+* ป้องกันคำถาม Memory ที่มีคำว่า “วันนี้” ไม่ให้เรียก Date Tool
+* เพิ่ม Intent สำหรับ Meeting และ Network โดยตอบอย่างปลอดภัยว่า Module ยังไม่เปิด
+* เพิ่ม Test Cases แกนหลักภาษาไทยและอังกฤษ
 * บันทึก Intent และ Tool ที่ถูกเลือกลง Log
 
 ไฟล์ที่แนะนำ:
 
-* `app/agent/intent_classifier.py`
-* `app/agent/router.py`
+* `app/agents/intent_classifier.py`
+* `app/agents/router.py`
+* `app/core/intents.py`
 * `app/tools/resolver.py`
 * `tests/test_intent_classifier.py`
 
@@ -198,7 +200,7 @@ General Agent / Memory / Tool / Meeting Module
 
 ## Step 4: TTS Stability
 
-Status: Planned
+Status: Completed for Core MVP / Voice Quality Tuning Pending
 
 เป้าหมาย:
 
@@ -206,15 +208,13 @@ Status: Planned
 
 สิ่งที่ต้องทำ:
 
-* แยก TTS ออกจาก Main Loop
-* สร้าง `TTSRouter`
-* เพิ่ม Primary Engine และ Fallback Engine
-* ตรวจสถานะอินเทอร์เน็ตก่อนเลือก Online TTS
-* ถ้า Online TTS ล้มเหลว ให้เปลี่ยนไป Local TTS อัตโนมัติ
-* จำกัดเวลา Timeout
-* เพิ่ม Retry แบบมีจำนวนครั้งจำกัด
-* เก็บ Error Log
-* ระบบต้องตอบเป็นข้อความได้ แม้สร้างเสียงไม่สำเร็จ
+* มี `TTSRouter` แยกภาษาไทยและอังกฤษ
+* เปลี่ยนเป็น Lazy Loading เพื่อลดภาระตอนเริ่มโปรแกรม
+* เพิ่ม Error Log และ `TTSError`
+* ลบไฟล์เสียงชั่วคราวของ Edge TTS หลังเล่นเสร็จ
+* แก้ Busy Loop ระหว่างเล่นเสียง
+* ระบบตอบเป็นข้อความและทำงานต่อได้เมื่อ TTS ล้มเหลว
+* คุณภาพเสียง, Timeout, Retry และ Local English Fallback เป็นงานจูนหลัง MVP
 
 ตัวอย่าง Routing:
 
@@ -251,7 +251,7 @@ Local English TTS
 
 ## Step 5: Interrupt Speech
 
-Status: Planned
+Status: Deferred to Phase 1.1 Voice UX
 
 หน้าที่:
 
@@ -288,7 +288,7 @@ State ที่แนะนำ:
 
 ## Step 6: Streaming and Faster Response
 
-Status: Planned
+Status: Deferred to Phase 1.1 Voice UX
 
 เป้าหมาย:
 
@@ -315,7 +315,7 @@ Status: Planned
 
 ## Step 7: Stability, Logging and Recovery
 
-Status: Planned
+Status: Core Logging Completed / Runtime Health Check Pending
 
 เป้าหมาย:
 
@@ -343,19 +343,54 @@ Status: Planned
 * `config/settings.yaml`
 * `.env`
 
-เกณฑ์จบ Phase 1:
+เกณฑ์ปิด Phase 1 Core MVP:
 
 * Jarvis สนทนาด้วยเสียงต่อเนื่องได้
 * Wake Word ทำงานตามเกณฑ์
 * Intent Routing ผ่านชุดทดสอบ
 * TTS ล้มแล้วระบบไม่ปิด
-* Interrupt Speech ใช้งานได้
 * Error ของ Module หนึ่งไม่ทำให้ระบบทั้งหมดหยุด
 * มี Log เพียงพอสำหรับหาสาเหตุเมื่อเกิดปัญหา
 
+สถานะวันที่ 2026-07-31:
+
+* โค้ด Core MVP และ Automated Test แกนหลักเสร็จแล้ว
+* Automated Test ใหม่ผ่าน 9/9 เคส
+* ต้องทำ Hardware Acceptance Test บนเครื่องจริงก่อนประกาศ Stable Release
+* Wake Word ต้องทดสอบอย่างน้อย 50 ครั้งและบันทึก Detection Rate
+* ต้องทดสอบไมโครโฟน, Whisper, Ollama, Thai TTS และ Edge TTS แบบ End-to-End
+* Interrupt Speech และ Streaming ย้ายไป Phase 1.1 และไม่ขวาง Phase 2
+
 ---
 
-# Phase 2: Meeting Intelligence Module
+# Phase 1.1: Advanced Voice UX
+
+Status: Optional / Deferred
+
+งานในเฟสนี้:
+
+* Interrupt Speech
+* Streaming LLM และ Streaming TTS
+* Playback Queue และ Cancellation
+* ลด Echo จากลำโพงกลับเข้าไมโครโฟน
+* จูน Voice Personality และ Latency
+
+เฟสนี้สามารถทำภายหลังได้ โดยไม่ขวาง Meeting Intelligence หรือ Home Network Intelligence
+
+---
+
+# Phase 2 Decision Gate
+
+หลัง Phase 1 ผ่าน Hardware Acceptance ให้เลือกทำหนึ่งในสอง Track ตามความพร้อมของข้อมูล:
+
+* Track A: Meeting Intelligence Module
+* Track B: Home Network Anomaly Detection
+
+ทั้งสอง Track ใช้ Core Intent, Router, Logging และ Tool Interface ร่วมกัน และสามารถสลับลำดับได้
+
+---
+
+# Phase 2A: Meeting Intelligence Module
 
 Status: Planned
 
@@ -697,6 +732,95 @@ Status: Planned
 
 ---
 
+# Phase 2B: Home Network Anomaly Detection
+
+Status: Added / Data Source Discovery Required
+
+เป้าหมาย:
+
+ให้ Jarvis รับข้อมูลการใช้งานเครือข่ายภายในบ้าน เรียนรู้พฤติกรรมปกติ ตรวจจับเหตุการณ์ผิดปกติ และอธิบายระดับความเสี่ยงพร้อมเหตุผล โดยไม่ให้ LLM เป็นผู้สร้างคะแนนความเสี่ยงเอง
+
+ข้อมูลที่ต้องการ:
+
+* จำนวนอุปกรณ์ที่เชื่อมต่อ Wi-Fi
+* อุปกรณ์ใหม่หรืออุปกรณ์ที่ไม่รู้จัก
+* ปริมาณ Download และ Upload แยกตามช่วงเวลา
+* ปริมาณการใช้งานแยกตามอุปกรณ์ ถ้า Router รองรับ
+* Domain/DNS metadata เท่าที่ระบบให้ได้ โดยไม่เก็บเนื้อหาส่วนตัว
+* Connection failure, traffic spike และเวลาที่ใช้งานผิดปกติ
+
+Architecture:
+
+Router / Access Point / DNS / Firewall
+↓
+Data Collector
+↓
+Schema Validation and Storage
+↓
+Feature Extraction and Baseline
+↓
+Rule Engine + Anomaly Detection
+↓
+Risk Score, Confidence and Reasons
+↓
+Jarvis Network Tool and Explanation
+
+## Step 1: Data Source Discovery
+
+* ระบุยี่ห้อ รุ่น และ Firmware ของ Router/Access Point
+* ตรวจ API, SNMP, Syslog, DHCP, ARP และ per-device traffic
+* ระบุข้อมูลที่ดึงได้จริงและช่วงเวลาที่เก็บได้
+* ห้ามเก็บ Password, Payload หรือเนื้อหาการสื่อสาร
+
+## Step 2: Network Data Foundation
+
+* สร้าง Network Event Schema
+* สร้าง Mock JSON/CSV Collector ก่อนเชื่อม Router จริง
+* สร้าง SQLite Repository แยกจาก Conversation Memory
+* เพิ่ม Data Retention และ Known Device Registry
+
+## Step 3: Explainable Risk MVP
+
+* เริ่มด้วย Rule-based Risk Score 0–100
+* แบ่ง LOW, MEDIUM, HIGH และ CRITICAL
+* คืน Confidence, Evidence และ Recommended Actions
+* เพิ่ม Test Dataset สำหรับเหตุการณ์ปกติและผิดปกติ
+* Jarvis ต้องไม่อ้างว่าถูกโจมตีหากหลักฐานไม่พอ
+
+## Step 4: Baseline and Anomaly Detection
+
+* เก็บ Baseline อย่างน้อย 2–4 สัปดาห์
+* แยกพฤติกรรมตามอุปกรณ์ เวลา วันธรรมดา และวันหยุด
+* ทดลอง Isolation Forest หรือ Time-series Anomaly Detection
+* ใช้ ML ร่วมกับ Rule Engine ไม่ใช้แทนทั้งหมด
+* วัด False Positive และ False Negative
+
+## Step 5: Jarvis Integration
+
+Intent ที่รองรับ:
+
+* `NETWORK_STATUS`
+* `NETWORK_RISK`
+* `DEVICE_LIST`
+* `TRAFFIC_USAGE`
+
+Tool ที่วางแผน:
+
+* `get_network_status`
+* `list_connected_devices`
+* `get_bandwidth_usage`
+* `analyze_network_risk`
+
+เกณฑ์ MVP:
+
+* Collector ทำงานซ้ำได้โดยไม่สร้างข้อมูลซ้ำผิดพลาด
+* ทุก Risk Score มีเหตุผลและหลักฐานประกอบ
+* แยก Unknown Device ออกจาก Malicious Device
+* Data source ล่มแล้ว Jarvis ยังทำงานส่วนอื่นต่อได้
+* มีการแจ้งว่า “ข้อมูลไม่เพียงพอ” เมื่อ Confidence ต่ำ
+
+---
+
 # Phase 3: Remote Channel Integration
 
 Status: Planned
@@ -930,7 +1054,7 @@ Status: Planned
 
 # Phase 4: Tool Parameters and General Tools
 
-Status: Planned
+Status: Basic Web Tools Completed / Structured Schema Planned
 
 เป้าหมาย:
 
@@ -954,6 +1078,22 @@ Status: Planned
 * ตรวจสอบ Parameter ก่อนเรียก Tool
 * เพิ่ม Fallback เมื่อ Parameter ไม่ครบ
 * เพิ่ม Confirmation สำหรับคำสั่งสำคัญ
+
+สิ่งที่ทำแล้ววันที่ 2026-07-31:
+
+* สั่งเล่นเพลงตามชื่อและเปิด YouTube ผลลัพธ์แรกโดยตรงผ่าน `yt-dlp`
+* ถ้าค้นหาวิดีโอโดยตรงล้มเหลว จะเปิดหน้าค้นหา YouTube แทน
+* เปิด Facebook ผ่านคำสั่งภาษาไทยและอังกฤษ
+* เปิด Instagram/IG ผ่านคำสั่งภาษาไทยและอังกฤษ
+* ค้นหา Google พร้อมส่งคำค้นหาเป็น Parameter
+* เพิ่ม Intent, Alias, Resolver และ Automated Test สำหรับ Web Tools
+
+ตัวอย่างคำสั่ง:
+
+* “จาร์วิส เปิดเพลง Numb Linkin Park”
+* “จาร์วิส เปิด Facebook”
+* “จาร์วิส เปิดไอจี”
+* “จาร์วิส ค้นหาในกูเกิลเรื่อง AI Agent”
 
 ---
 

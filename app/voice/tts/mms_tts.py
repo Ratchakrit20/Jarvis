@@ -1,18 +1,16 @@
 import torch
 import sounddevice as sd
 from transformers import AutoTokenizer, VitsModel
+from app.config import TTS_MODEL
 from .processor import clean_text
-
-
-MODEL = "facebook/mms-tts-tha"
 
 
 class MMSTTS:
 
     def __init__(self):
 
-        self.model = VitsModel.from_pretrained(MODEL)
-        self.tokenizer = AutoTokenizer.from_pretrained(MODEL)
+        self.model = VitsModel.from_pretrained(TTS_MODEL)
+        self.tokenizer = AutoTokenizer.from_pretrained(TTS_MODEL)
 
     def speak(self, text: str):
 

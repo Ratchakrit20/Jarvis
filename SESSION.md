@@ -1008,3 +1008,116 @@ UNKNOWN
 * Tool Action ถูกส่งไป Tool Resolver
 * Meeting Command พร้อมรองรับในอนาคต
 * Unknown Intent ไม่ทำให้ Jarvis ล่ม
+
+---
+
+# 2026-07-31
+
+## Phase 1 Core Completion and Roadmap Update
+
+Status: Core MVP Code Complete / Hardware Acceptance Pending
+
+งานที่ทำ:
+
+* เพิ่ม `Intent` และ `IntentResult` เป็นโมเดลกลาง
+* เพิ่ม `IntentClassifier` แบบ deterministic สำหรับคำสั่งหลัก
+* เพิ่ม `AgentRouter` ให้จำแนก Intent ก่อนเลือก Tool
+* รองรับ General Chat, Memory, Date, Time, Tool, System, Meeting และ Network Intent
+* เพิ่ม Confidence Score และ Reason ในผลจำแนก
+* ป้องกันคำถาม “วันนี้เราคุยอะไรกัน” ไม่ให้เรียก Date Tool
+* ปรับ `JarvisAgent` ไม่ให้ส่งข้อความผู้ใช้ซ้ำเข้า LLM
+* แก้ `except:` แบบกว้างใน JSON parsing
+* เพิ่ม Dependency Injection ให้ Agent ทดสอบได้ง่ายขึ้น
+* เพิ่ม Central Logging สำหรับ Intent, Tool, STT, Wake Word, TTS และ Main Loop
+* ปรับ TTS Router เป็น Lazy Loading
+* เพิ่ม `TTSError` flow และให้ระบบทำงานต่อเมื่อไม่มีเสียง
+* แก้ Edge TTS busy loop และลบ Temporary Audio หลังใช้งาน
+* แยก Exit Command Helper ออกจาก Voice Dependencies
+* เพิ่ม Automated Test สำหรับ Intent, Router, Wake Word และ Exit Command
+
+ผลทดสอบ:
+
+* Automated Test ใหม่ผ่าน 9/9 เคส
+* Python syntax validation ผ่าน
+* ยังไม่ได้รับรองคุณภาพไมโครโฟน, Wake Word และ TTS บน Hardware จริงใน Session นี้
+
+ไฟล์สำคัญที่เพิ่ม:
+
+* `app/core/intents.py`
+* `app/core/commands.py`
+* `app/agents/intent_classifier.py`
+* `app/agents/router.py`
+* `tests/test_intent_classifier.py`
+* `tests/test_core_voice.py`
+
+## Phase 1 Acceptance Remaining
+
+ก่อนติดป้าย Stable Release ต้องทำบนเครื่องจริง:
+
+1. รัน `scripts/doctor.py`
+2. ทดสอบ Voice Pipeline แบบ End-to-End
+3. ทดสอบ Wake Word อย่างน้อย 50 ครั้ง
+4. บันทึก Detection Rate, False Positive และ False Negative
+5. ทดสอบ Thai TTS และ Edge TTS ทั้งกรณี Online/Offline
+6. ตรวจ Log หลังรันต่อเนื่อง
+
+Interrupt Speech และ Streaming ถูกย้ายไป Phase 1.1 เพื่อไม่ขวาง Module ธุรกิจถัดไป
+
+## New Planned Track: Home Network Anomaly Detection
+
+Status: Added to Roadmap / Not Implemented
+
+เป้าหมาย:
+
+* รับจำนวนอุปกรณ์ที่เชื่อม Wi-Fi
+* รับปริมาณการใช้งานเครือข่ายและเว็บไซต์/โดเมนเท่าที่ Router รองรับ
+* ตรวจอุปกรณ์ใหม่และพฤติกรรมผิดปกติ
+* สร้าง Risk Score, Confidence, Evidence และคำแนะนำ
+* ให้ Jarvis อธิบายผลโดยไม่สร้างข้อเท็จจริงหรือคะแนนเอง
+
+หลักการพัฒนา:
+
+1. ตรวจแหล่งข้อมูลจาก Router ก่อน
+2. สร้าง Mock Collector และ SQLite Storage
+3. เริ่มด้วย Explainable Rule Engine
+4. เก็บ Baseline 2–4 สัปดาห์
+5. เพิ่ม Anomaly Detection หลังมีข้อมูลเพียงพอ
+
+## Next Session Decision
+
+หลัง Phase 1 ผ่าน Hardware Acceptance ให้เลือก:
+
+* Phase 2A: Meeting Intelligence
+* Phase 2B: Home Network Anomaly Detection
+
+ถ้า Router ยังไม่สามารถส่งข้อมูลที่ต้องการได้ ให้เริ่ม Meeting Intelligence ก่อน ระหว่างนั้นจึงสำรวจหรือเปลี่ยน Network Data Source
+
+---
+
+## 2026-07-31: Web Tools Expansion
+
+Status: Completed
+
+เพิ่มความสามารถ:
+
+* `play_youtube_song` รับชื่อเพลง ค้นหา YouTube ผลลัพธ์แรกผ่าน `yt-dlp` และเปิดวิดีโอโดยตรง
+* ถ้า Direct Lookup ล้มเหลว ระบบเปิดหน้าค้นหา YouTube เป็น Fallback
+* `open_facebook` เปิด Facebook ใน Default Browser
+* `open_instagram` เปิด Instagram ใน Default Browser
+* `search_google` แยกคำค้นหาจากภาษาไทยหรืออังกฤษและเปิด Google Results
+* เพิ่ม Alias สำหรับ Facebook, FB, Instagram, IG, เฟซบุ๊ก, เฟส, อินสตาแกรม และไอจี
+* ปรับ Intent Classifier ให้ Web Commands ผ่าน Tool Route
+* เพิ่ม `yt-dlp` ใน `requirements.txt` และ Installation Doctor
+
+ตัวอย่างคำสั่งที่รองรับ:
+
+* “จาร์วิส เปิดเพลง Shape of You”
+* “จาร์วิส เล่นเพลง Numb Linkin Park”
+* “จาร์วิส เปิด Facebook”
+* “จาร์วิส เปิดไอจี”
+* “จาร์วิส ค้นหาในกูเกิลเรื่อง AI Agent”
+
+ผลทดสอบ:
+
+* Automated Test รวมผ่าน 14/14 เคส
+* Tests ไม่เปิด Browser จริง โดยใช้ Mock ตรวจ URL และ Routing

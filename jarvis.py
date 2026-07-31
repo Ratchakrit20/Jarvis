@@ -1,59 +1,16 @@
-from app.voice.vad import VoiceActivityRecorder
-from app.voice.wake_word import WakeWordDetector
+from app.agents.jarvis_agent import JarvisAgent
+from app.core.commands import should_exit
+from app.core.logger import get_logger
 from app.voice.stt import WhisperSTT
 from app.voice.tts import TTSRouter
-from app.agents.jarvis_agent import JarvisAgent
+from app.voice.vad import VoiceActivityRecorder
+from app.voice.wake_word import WakeWordDetector
 
 
-EXIT_WORDS = [
-    "ออก",
-    "ปิด",
-    "หยุด",
-    "เลิก",
-    "ลาก่อน",
-    "exit",
-    "quit",
-    "stop",
-]
+logger = get_logger("jarvis")
 
 
-def should_exit(text: str) -> bool:
-    if not text:
-        return False
-
-    text = text.strip().lower()
-
-    # กันเคส "เปิด" โดนเข้าใจผิดว่าเป็น "ปิด"
-    non_exit_words = [
-        "เปิด",
-        "เปิดยูทูป",
-        "เปิด youtube",
-        "เปิดเพลง",
-        "เปิดเว็บ",
-        "เปิดโปรแกรม",
-    ]
-
-    for word in non_exit_words:
-        if word in text:
-            return False
-
-    exit_phrases = [
-        "ออก",
-        "ออกจากระบบ",
-        "ปิดจาร์วิส",
-        "ปิด jarvis",
-        "หยุดทำงาน",
-        "เลิกทำงาน",
-        "ลาก่อน",
-        "exit",
-        "quit",
-        "stop",
-    ]
-
-    return any(phrase == text or phrase in text for phrase in exit_phrases)
-
-
-def safe_speak(tts: TTSRouter, text: str):
+def safe_speak(tts: TTSRouter, text: str) -> bool:
     """
     พูดแบบปลอดภัย
 
@@ -62,17 +19,21 @@ def safe_speak(tts: TTSRouter, text: str):
     """
 
     if not text:
-        return
+        return False
 
     try:
         tts.speak(text)
+        return True
 
     except Exception as e:
+        logger.exception("TTS playback failed")
         print("⚠️ TTS Error:", e)
         print("Jarvis ยังทำงานต่อ แต่รอบนี้ไม่ได้พูดออกลำโพง")
+        return False
 
 
 def main():
+    logger.info("Jarvis starting")
     print("\n====== Initializing Jarvis ======\n")
 
     vad = VoiceActivityRecorder()
@@ -96,6 +57,7 @@ def main():
                 continue
 
             text = stt.transcribe(audio)
+            logger.info("speech_transcribed has_text=%s", bool(text))
 
             print()
             print("HEARD :", text)
@@ -117,6 +79,7 @@ def main():
                 continue
 
             command = wake_word.remove_wake_word(text)
+            logger.info("wake_word_detected command_length=%d", len(command))
 
             print("COMMAND :", command)
 
@@ -134,10 +97,12 @@ def main():
             safe_speak(tts, reply)
 
         except KeyboardInterrupt:
+            logger.info("Jarvis stopped by user")
             print("\n\n🛑 Jarvis stopped by user")
             break
 
         except Exception as e:
+            logger.exception("Unhandled main-loop error")
             print("\n❌ Jarvis Error:", e)
             print("ระบบยังทำงานต่อ สามารถลองสั่งใหม่ได้\n")
 
